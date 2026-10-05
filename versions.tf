@@ -17,9 +17,9 @@ terraform {
   #         outputs, and run: terraform init -migrate-state
   #
    backend "gcs" {
-     bucket = "seh-cld-admn-btstrp-718b-tfstate"
-     prefix = "bootstrap"
-   }
+    bucket = "shv-cld-admn-btstrp-4329-tfstate"
+    prefix = "bootstrap"
+  }
 }
 
 provider "google" {
