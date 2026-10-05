@@ -7,8 +7,8 @@ resource "random_id" "suffix" {
 }
 
 resource "google_project" "seed" {
-  name            = "${var.project_prefix}-seed"
-  project_id      = "${var.project_prefix}-seed-${random_id.suffix.hex}"
+  name            = "Cloud Admin Bootstrap"
+  project_id      = "${var.project_prefix}-cld-admn-btstrp-${random_id.suffix.hex}"
   billing_account = var.billing_account
 
   # A project can have one parent: a folder, the organization, or neither.

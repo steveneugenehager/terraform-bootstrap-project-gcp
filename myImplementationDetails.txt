@@ -1,0 +1,13 @@
+example_backend_block = <<EOT
+terraform {
+  backend "gcs" {
+    bucket                      = "seh-cld-admn-btstrp-718b-tfstate"
+    prefix                      = "DOMAIN/ENV/COMPONENT"
+    impersonate_service_account = "terraform@seh-cld-admn-btstrp-718b.iam.gserviceaccount.com"
+  }
+}
+
+EOT
+seed_project_id = "seh-cld-admn-btstrp-718b"
+state_bucket = "seh-cld-admn-btstrp-718b-tfstate"
+terraform_service_account = "terraform@seh-cld-admn-btstrp-718b.iam.gserviceaccount.com"

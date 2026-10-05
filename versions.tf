@@ -16,10 +16,10 @@ terraform {
   # Step 2: after the first apply, uncomment, fill in the bucket from the
   #         outputs, and run: terraform init -migrate-state
   #
-  # backend "gcs" {
-  #   bucket = "REPLACE-with-state_bucket-output"
-  #   prefix = "bootstrap"
-  # }
+   backend "gcs" {
+     bucket = "seh-cld-admn-btstrp-718b-tfstate"
+     prefix = "bootstrap"
+   }
 }
 
 provider "google" {
