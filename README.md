@@ -17,6 +17,7 @@ ever lives on a single machine.
 | State bucket (`<seed-project-id>-tfstate`) | Shared by all configurations, each under its own prefix. Versioned, public access blocked, uniform bucket-level access, old versions trimmed by a lifecycle rule. |
 | `terraform` service account | The identity later configurations run as. No key files; access is by impersonation. |
 | IAM bindings | Service account access to the state bucket; impersonation rights for listed admins; optional Billing Account User; Project Creator and Folder Admin at the organization when `org_id` is set. |
+| Org-level admin groups | Such are few, small and tightly held.|
 
 ## Repository layout
 
