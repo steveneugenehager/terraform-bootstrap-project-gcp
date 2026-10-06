@@ -1,6 +1,8 @@
 # ---------------------------------------------------------------------------
 # Seed project: holds Terraform state and the identity Terraform runs as.
 # ---------------------------------------------------------------------------
+# Change History
+# 2026-10-06 Steve Hager - v1.1 Added "cloudidentity.googleapis.com" to seed_apis list.
 
 resource "random_id" "suffix" {
   byte_length = 2
@@ -33,6 +35,7 @@ locals {
     "iamcredentials.googleapis.com",       # service account impersonation
     "serviceusage.googleapis.com",         # enable APIs in other projects
     "storage.googleapis.com",              # the state bucket
+    "cloudidentity.googleapis.com",
   ]
 }
 
