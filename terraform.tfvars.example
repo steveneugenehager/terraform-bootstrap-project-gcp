@@ -5,6 +5,7 @@ terraform_admins = ["user:you@example.com"]
 
 # Uncomment once you have an organization (gcloud organizations list).
 # org_id = "123456789012"
+# org_domain = "YourOrgDomainName"
 
 # Set true if your account administers the billing account.
 # grant_billing_user = true
