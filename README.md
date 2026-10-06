@@ -28,7 +28,9 @@ ever lives on a single machine.
 ├── outputs.tf                  # Project ID, bucket, service account, example backend block
 ├── terraform.tfvars.example    # Copy to terraform.tfvars and fill in
 ├── .terraform.lock.hcl         # Pinned provider versions (committed)
-└── .gitignore                  # Excludes state, tfvars, and .terraform/
+├──.gitignore                   # Excludes state, tfvars, and .terraform/
+└── follow-on                   # Follow On Activities belonging in "Bootstrap" stage.
+   └── create_secondary_org_admin.sh  # Creates secondary Super Admin for the GCP organization.
 ```
 
 ## Prerequisites
