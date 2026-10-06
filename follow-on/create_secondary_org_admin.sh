@@ -19,6 +19,7 @@
 #       --username breakglass-admin \
 #       --given "Break" --family "Glass" \
 #       --project my-bootstrap-project \
+#       --client-secret my-client-secret.json \
 #       [--recovery-email you@personal.example] \
 #       [--org-roles "roles/resourcemanager.organizationAdmin,roles/billing.admin"] \
 #       [--prompt-password] \
@@ -27,6 +28,9 @@
 # Password: by default a random temporary password is generated and written
 # to a mode-600 temp file. With --prompt-password you type the final password
 # instead (hidden input, entered twice); nothing is written to disk.
+#
+# Change History
+# 2026-10-06 Steve Hager v1.1 Incorporated --client-secret argument handling.
 
 set -euo pipefail
 
@@ -43,6 +47,7 @@ ORG_ROLES="roles/resourcemanager.organizationAdmin"
 DRY_RUN=false
 PROMPT_PW=false
 MIN_PW_LEN=16
+CLIENT_SECRET_JSON=""
 
 DIR_API="https://admin.googleapis.com/admin/directory/v1"
 ADMIN_SCOPES="https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/admin.directory.user"
@@ -58,6 +63,7 @@ while [[ $# -gt 0 ]]; do
     --project)         PROJECT="$2"; shift 2 ;;
     --recovery-email)  RECOVERY_EMAIL="$2"; shift 2 ;;
     --org-roles)       ORG_ROLES="$2"; shift 2 ;;
+    --client-secret)   CLIENT_SECRET_JSON="$2"; shift 2 ;;
     --prompt-password) PROMPT_PW=true; shift ;;
     --dry-run)         DRY_RUN=true; shift ;;
     -h|--help)         usage ;;
@@ -99,7 +105,7 @@ if [[ -z "$TOKEN" ]] || ! has_admin_scope "$TOKEN"; then
   log "Logging in for ADC with Admin SDK scopes (sign in as an existing Super Admin)"
   # If Google blocks the default gcloud client for these scopes, create a
   # Desktop OAuth client in $PROJECT and add: --client-id-file=client_secret.json
-  gcloud auth application-default login --scopes="$ADMIN_SCOPES"
+  gcloud auth application-default login --scopes="$ADMIN_SCOPES" --client-id-file="${CLIENT_SECRET_JSON}"
   TOKEN="$(get_token)"
   has_admin_scope "$TOKEN" || die "ADC token still lacks admin.directory.user scope"
 fi
@@ -179,6 +185,9 @@ elif [[ "$code" == "404" ]]; then
 else
   die "Unexpected response checking user ($code): $(body_of "$resp")"
 fi
+
+echo "Sleeping here for 30 seconds..."
+sleep 30
 
 # ----------------------------------------------------------------------------
 # 2. Grant Super Admin
