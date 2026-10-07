@@ -91,8 +91,8 @@ resource "google_storage_bucket" "tfstate" {
 
 resource "google_service_account" "terraform" {
   project      = google_project.seed.project_id
-  account_id   = "terraform"
-  display_name = "Terraform automation"
+  account_id   = "terraform-super-admin"
+  display_name = "Terraform automation as Super Admin for the Org's Bootstrap Project"
 
   depends_on = [google_project_service.seed]
 }

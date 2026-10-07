@@ -51,6 +51,11 @@ These steps can't be done by Terraform and must exist first.
    - Terraform 1.5 or later (`terraform version`)
    - Google Cloud CLI (`gcloud version`)
 
+Establish your GCP authentication using the "Org Owner" "Super Admin" account via: 
+```
+gcloud auth login
+```
+
 Look up the IDs you'll need:
 
 ```bash
