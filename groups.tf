@@ -14,10 +14,6 @@ provider "google" {
   user_project_override = true
 }
 
-#variable "bootstrap_project_id" {
-#  type = string
-#}
-
 # Looks up the org ID and Workspace customer ID from the domain
 data "google_organization" "org" {
   domain = var.org_domain
