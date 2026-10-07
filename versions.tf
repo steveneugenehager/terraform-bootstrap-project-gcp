@@ -1,5 +1,6 @@
 # Change History
 # 2026-10-07 Steve Hager - v1.1 Added terraform.required_providers.time
+# 2026-10-07 Steve Hager - v1.2 After initial local state run, updating backend block.
 terraform {
   required_version = ">= 1.5"
 
@@ -22,10 +23,10 @@ terraform {
   # Step 2: after the first apply, uncomment, fill in the bucket from the
   #         outputs, and run: terraform init -migrate-state
   #
-#  backend "gcs" {
-#    bucket = "shv-cld-admn-btstrp-4329-tfstate"
-#    prefix = "bootstrap"
-#  }
+  backend "gcs" {
+    bucket = "shv-cld-admn-btstrp-4a71-tfstate"
+    prefix = "bootstrap"
+  }
 }
 
 provider "google" {
