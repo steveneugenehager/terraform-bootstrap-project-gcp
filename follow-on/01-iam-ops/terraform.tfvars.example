@@ -1,0 +1,18 @@
+# Copy to terraform.tfvars and fill in.
+
+common_folder_id      = "folders/000000000000"
+billing_account_id    = "XXXXXX-XXXXXX-XXXXXX"
+workspace_customer_id = "C00000000"
+
+# Usually your bootstrap project ID, so user-ADC API calls have a quota project.
+quota_project = "your-bootstrap-project-id"
+
+# Optional: run as the bootstrap Terraform SA instead of your own ADC.
+# terraform_impersonate_sa = "terraform@your-bootstrap-project-id.iam.gserviceaccount.com"
+
+impersonators = [
+  "user:admin@stevenhager.com",
+]
+
+# Set false if you'd rather assign the Workspace roles in the Admin console.
+assign_workspace_roles = true
