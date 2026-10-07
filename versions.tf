@@ -16,7 +16,7 @@ terraform {
   # Step 2: after the first apply, uncomment, fill in the bucket from the
   #         outputs, and run: terraform init -migrate-state
   #
-   backend "gcs" {
+  backend "gcs" {
     bucket = "shv-cld-admn-btstrp-4329-tfstate"
     prefix = "bootstrap"
   }

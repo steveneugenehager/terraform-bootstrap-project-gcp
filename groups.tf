@@ -1,7 +1,10 @@
+# Change History
+# 2026-10-06 Steve Hager - v1.0 Piloting with only gcp-organization-admins/
+# 2026-10-06 Steve Hager - v1.1 Adding the rest of the recommended org-level groups and bindings.
 # --- inputs -----------------------------------------------------------
 variable "org_domain" {
   type    = string
-  default = null 
+  default = null
 }
 
 # Dedicated provider for Cloud Identity calls, billed to the seed project
@@ -33,7 +36,66 @@ locals {
         "roles/billing.user",
       ]
     }
-    # "gcp-billing-admins" = { description = "...", org_roles = [...] }
+    "gcp-billing-admins" = {
+      description = "Billing administrators: billing accounts, budgets, payments"
+      org_roles = [
+        "roles/billing.admin",
+        "roles/billing.creator",
+        "roles/resourcemanager.organizationViewer",
+      ]
+    }
+
+    "gcp-billing-viewers" = {
+      description = "Read-only access to billing accounts and spend"
+      org_roles = [
+        "roles/billing.viewer",
+      ]
+    }
+
+    "gcp-security-admins" = {
+      description = "Security posture: IAM review, Security Command Center, audit logs"
+      org_roles = [
+        "roles/iam.securityReviewer",
+        "roles/iam.organizationRoleViewer",
+        "roles/securitycenter.admin",
+        "roles/resourcemanager.folderIamAdmin",
+        "roles/logging.privateLogViewer",
+        "roles/logging.configWriter",
+        "roles/compute.viewer",
+        "roles/container.viewer",
+      ]
+    }
+
+    "gcp-network-admins" = {
+      description = "Networking: Shared VPC, firewall rules, routes, connectivity"
+      org_roles = [
+        "roles/compute.networkAdmin",
+        "roles/compute.xpnAdmin",
+        "roles/compute.securityAdmin",
+        "roles/resourcemanager.folderViewer",
+      ]
+    }
+
+    "gcp-logging-admins" = {
+      description = "Logging configuration: sinks, buckets, exclusions"
+      org_roles = [
+        "roles/logging.admin",
+      ]
+    }
+
+    "gcp-logging-viewers" = {
+      description = "Read-only access to logs (excluding Data Access logs)"
+      org_roles = [
+        "roles/logging.viewer",
+      ]
+    }
+
+    "gcp-monitoring-admins" = {
+      description = "Monitoring: dashboards, alerting policies, uptime checks"
+      org_roles = [
+        "roles/monitoring.admin",
+      ]
+    }
   }
 
   # flatten group -> roles into one map entry per binding
@@ -46,6 +108,7 @@ locals {
 
 # --- groups -----------------------------------------------------------
 resource "google_cloud_identity_group" "admin" {
+  provider = google.identity
   for_each = local.admin_groups
 
   parent       = "customers/${data.google_organization.org.directory_customer_id}"
