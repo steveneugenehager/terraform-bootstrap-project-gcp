@@ -3,6 +3,8 @@
 # ---------------------------------------------------------------------------
 # Change History
 # 2026-10-06 Steve Hager - v1.1 Added "cloudidentity.googleapis.com" to seed_apis list.
+# 2026-10-07 Steve Hager - v1.2 Added "time_sleep" "seed_apis_propagation" to prevent race condition 
+#                                 involving an API enablement and group creation. 
 
 resource "random_id" "suffix" {
   byte_length = 2
@@ -45,6 +47,12 @@ resource "google_project_service" "seed" {
   project            = google_project.seed.project_id
   service            = each.value
   disable_on_destroy = false
+}
+
+# Freshly enabled APIs take a short while to become usable.
+resource "time_sleep" "seed_apis_propagation" {
+  depends_on      = [google_project_service.seed]
+  create_duration = "120s"
 }
 
 # ---------------------------------------------------------------------------

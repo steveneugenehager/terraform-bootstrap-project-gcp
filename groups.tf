@@ -1,6 +1,7 @@
 # Change History
 # 2026-10-06 Steve Hager - v1.0 Piloting with only gcp-organization-admins/
 # 2026-10-06 Steve Hager - v1.1 Adding the rest of the recommended org-level groups and bindings.
+# 2026-10-07 Steve Hager - v1.2 Adding a depends on sleep (time_sleep.seed_apis_propagation) 
 # --- inputs -----------------------------------------------------------
 variable "org_domain" {
   type    = string
@@ -121,6 +122,7 @@ resource "google_cloud_identity_group" "admin" {
   }
 
   initial_group_config = "WITH_INITIAL_OWNER"
+  depends_on           = [time_sleep.seed_apis_propagation]
 }
 
 # --- org-level IAM bindings -------------------------------------------
