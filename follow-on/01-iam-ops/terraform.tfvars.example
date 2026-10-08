@@ -1,5 +1,9 @@
 # Copy to terraform.tfvars and fill in.
 
+# Change History
+# 2026-10-07 Steve Hager - v1.0 Initial version
+# 2026-10-07 Steve Hager - v1.1 corrected SA name to be consistent with the bootstrap project.
+
 common_folder_id      = "folders/000000000000"
 billing_account_id    = "XXXXXX-XXXXXX-XXXXXX"
 workspace_customer_id = "C00000000"
@@ -16,8 +20,8 @@ project_deletion_policy = "PREVENT"
 # Leave unset if impersonating with an SA.  The SA's own project handles quota.
 #quota_project = "your-bootstrap-project-id"
 
-# Rn as the bootstrap Terraform SA instead of your own ADC.
-terraform_impersonate_sa = "terraform@your-bootstrap-project-id.iam.gserviceaccount.com"
+# Run as the bootstrap Terraform SA instead of your own ADC.
+terraform_impersonate_sa = "terraform-super-admin@your-bootstrap-project-id.iam.gserviceaccount.com"
 
 impersonators = [
   "user:admin@stevenhager.com",

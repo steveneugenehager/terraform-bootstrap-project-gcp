@@ -1,7 +1,7 @@
 # Copy to backend.hcl, then: terraform init -backend-config=backend.hcl
 
 # Change History
-# 2026-10-07 Steve Hager - v1.1 Added impersonate_service_account. 
+# 2026-10-07 Steve Hager - v1.1 Added impersonate_service_account.
 
 bucket                      = "your-bootstrap-tfstate-bucket"
 prefix                      = "common/identity-automation"

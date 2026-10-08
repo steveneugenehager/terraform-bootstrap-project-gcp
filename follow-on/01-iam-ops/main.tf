@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 # Change History
 # 2026-10-07 Steve Hager - v1.0 Initial version
-# 2026-10-07 Steve Hager - v1.1 Added resource "time_sleep" "sa_propagation" to prevent propagation delays from aborting a run. 
+# 2026-10-07 Steve Hager - v1.1 Added resource "time_sleep" "sa_propagation" to prevent propagation delays from aborting a run.
 
 locals {
   folder_id = trimprefix(var.common_folder_id, "folders/")
