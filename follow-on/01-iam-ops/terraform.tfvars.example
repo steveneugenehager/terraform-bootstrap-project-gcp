@@ -3,6 +3,7 @@
 # Change History
 # 2026-10-07 Steve Hager - v1.0 Initial version
 # 2026-10-07 Steve Hager - v1.1 corrected SA name to be consistent with the bootstrap project.
+# 2026-10-07 Steve Hager - v1.2 made references to bootstrap-project-id consistent with other files.
 
 common_folder_id      = "folders/000000000000"
 billing_account_id    = "XXXXXX-XXXXXX-XXXXXX"
@@ -21,7 +22,7 @@ project_deletion_policy = "PREVENT"
 #quota_project = "bootstrap-project-id"
 
 # Run as the bootstrap Terraform SA instead of your own ADC.
-terraform_impersonate_sa = "terraform-super-admin@your-bootstrap-project-id.iam.gserviceaccount.com"
+terraform_impersonate_sa = "terraform-super-admin@<bootstrap-project-id>.iam.gserviceaccount.com"
 
 impersonators = [
   "user:admin@stevenhager.com",
