@@ -18,7 +18,7 @@ project_deletion_policy = "PREVENT"
 
 # Usually your bootstrap project ID, so user-ADC API calls have a quota project.
 # Leave unset if impersonating with an SA.  The SA's own project handles quota.
-#quota_project = "your-bootstrap-project-id"
+#quota_project = "bootstrap-project-id"
 
 # Run as the bootstrap Terraform SA instead of your own ADC.
 terraform_impersonate_sa = "terraform-super-admin@your-bootstrap-project-id.iam.gserviceaccount.com"
