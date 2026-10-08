@@ -45,3 +45,6 @@ terraform.rc
 
 # Exclude all client_secret* files which may be used in gcloud authentication
 client_secret*
+
+# Per-deployment backend config; commit backend.hcl.example instead
+backend.hcl
