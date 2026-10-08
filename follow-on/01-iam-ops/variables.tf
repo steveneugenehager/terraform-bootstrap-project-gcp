@@ -17,17 +17,63 @@ variable "billing_account_id" {
 variable "project_name" {
   description = "Display name for the identity automation project."
   type        = string
-  default     = "identity-automation"
+  default     = "Identity Automation"
 }
 
-variable "project_id_prefix" {
-  description = "Prefix for the project ID; a random 4-hex suffix is appended for global uniqueness."
+variable "org_prefix" {
+  description = "Optional org prefix for the project ID (e.g. \"shv\"). Set to \"\" to omit."
   type        = string
-  default     = "identity-automation"
+  default     = "shv"
 
   validation {
-    condition     = can(regex("^[a-z][a-z0-9-]{4,24}$", var.project_id_prefix))
-    error_message = "Prefix must start with a letter, use lowercase letters/digits/hyphens, and be 5-25 characters (leaves room for the suffix)."
+    condition     = var.org_prefix == "" || can(regex("^[a-z][a-z0-9]{1,9}$", var.org_prefix))
+    error_message = "org_prefix must be empty, or 2-10 lowercase letters/digits starting with a letter."
+  }
+}
+
+variable "project_id_base" {
+  description = "Core of the project ID, typically <env>-<purpose>. Final ID is [org_prefix-]base[-suffix]."
+  type        = string
+  default     = "common-identity"
+
+  validation {
+    condition     = can(regex("^[a-z0-9][a-z0-9-]*[a-z0-9]$", var.project_id_base))
+    error_message = "project_id_base must use lowercase letters, digits and hyphens, and not start or end with a hyphen."
+  }
+}
+
+variable "project_id_suffix" {
+  description = <<-EOT
+    Optional suffix for the project ID:
+      ""        -> no suffix (default; predictable ID)
+      "random"  -> 4 random hex characters, generated once and kept in state
+      any other -> used literally, e.g. "01"
+    Changing this after the first apply changes the project ID, which forces replacement
+    (blocked by deletion_policy = PREVENT).
+  EOT
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.project_id_suffix == "" || can(regex("^[a-z0-9]{1,8}$", var.project_id_suffix))
+    error_message = "project_id_suffix must be empty, \"random\", or 1-8 lowercase letters/digits."
+  }
+}
+
+variable "project_deletion_policy" {
+  description = <<-EOT
+    Terraform-side guard for the project (not a GCP setting; changing it is an in-place update):
+      PREVENT -> terraform destroy / replacement fails (default)
+      DELETE  -> destroy deletes the project
+      ABANDON -> destroy removes it from state but leaves the project in GCP
+    To tear down: set DELETE, run apply (to record it in state), then destroy.
+  EOT
+  type        = string
+  default     = "PREVENT"
+
+  validation {
+    condition     = contains(["PREVENT", "DELETE", "ABANDON"], var.project_deletion_policy)
+    error_message = "project_deletion_policy must be PREVENT, DELETE or ABANDON."
   }
 }
 

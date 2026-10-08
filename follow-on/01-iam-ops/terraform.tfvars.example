@@ -4,6 +4,14 @@ common_folder_id      = "folders/000000000000"
 billing_account_id    = "XXXXXX-XXXXXX-XXXXXX"
 workspace_customer_id = "C00000000"
 
+# Project ID = [org_prefix-]project_id_base[-suffix]  ->  shv-common-identity
+org_prefix        = "shv"
+project_id_base   = "common-identity"
+project_id_suffix = ""        # "" = none, "random" = 4 hex chars, or a literal like "01"
+
+# PREVENT (default) | DELETE | ABANDON. Switching is in-place; the project is never recreated.
+project_deletion_policy = "PREVENT"
+
 # Usually your bootstrap project ID, so user-ADC API calls have a quota project.
 quota_project = "your-bootstrap-project-id"
 

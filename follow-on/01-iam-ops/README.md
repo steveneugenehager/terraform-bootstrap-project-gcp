@@ -7,7 +7,7 @@ Creates the project and service account used to automate user provisioning in
 
 | Resource | Purpose |
 |---|---|
-| `google_project.identity` | `identity-automation-xxxx` in the **common** folder, no default network, `deletion_policy = PREVENT` |
+| `google_project.identity` | `shv-common-identity` in the **common** folder, no default network, `deletion_policy = PREVENT` |
 | APIs | Admin SDK, Cloud Identity, IAM, IAM Credentials, Resource Manager, Service Usage, Logging |
 | `google_service_account.provisioner` | `user-provisioner@…` — **keyless**, used only through impersonation |
 | `roles/iam.serviceAccountTokenCreator` | Granted on the SA (not the project) to each principal in `impersonators` |
@@ -17,6 +17,22 @@ Creates the project and service account used to automate user provisioning in
 Because the SA holds Workspace admin roles itself, the automation calls the
 Admin SDK *as the SA* — no domain-wide delegation, no impersonating a human
 admin, no break-glass account involved.
+
+## Project ID naming
+
+`project_id = [org_prefix-]project_id_base[-suffix]`
+
+| `org_prefix` | `project_id_base` | `project_id_suffix` | Result |
+|---|---|---|---|
+| `shv` | `common-identity` | `""` | `shv-common-identity` (default) |
+| `shv` | `common-identity` | `random` | `shv-common-identity-3f9a` |
+| `shv` | `common-identity` | `01` | `shv-common-identity-01` |
+| `""` | `common-identity` | `""` | `common-identity` |
+
+A random suffix is generated once and kept in state. Decide on the ID before the
+first apply: changing any of these afterwards renames the project, which forces a
+replacement that `deletion_policy = "PREVENT"` will block. A non-empty `org_prefix`
+is also added as an `org` label.
 
 ## Prerequisites
 
@@ -65,8 +81,11 @@ and swap it into `workspace_admin_roles`.
 
 ## Notes
 
-- `deletion_policy = "PREVENT"` blocks `terraform destroy` of the project; set it
-  to `"DELETE"` deliberately if you ever need to tear it down.
+- `project_deletion_policy` (default `PREVENT`) blocks `terraform destroy` of the
+  project. It's a Terraform-only setting, so switching it is an in-place update and
+  never recreates the project. To tear down: set `DELETE`, run `terraform apply`
+  so the new value is saved in state, *then* `terraform destroy`. Setting it and
+  running destroy directly still fails, because destroy reads the value from state.
 - Org policy `iam.disableServiceAccountKeyCreation` pairs well with this — nothing
   here needs a key.
 - Not yet validated with `terraform validate` — run `terraform init && terraform validate` first.

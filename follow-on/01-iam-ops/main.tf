@@ -1,6 +1,17 @@
 locals {
   folder_id = trimprefix(var.common_folder_id, "folders/")
 
+  use_random_suffix = var.project_id_suffix == "random"
+  suffix            = local.use_random_suffix ? random_id.project_suffix[0].hex : var.project_id_suffix
+
+  # [org_prefix-]base[-suffix]; compact() drops the empty parts.
+  project_id = join("-", compact([var.org_prefix, var.project_id_base, local.suffix]))
+
+  project_labels = merge(
+    var.labels,
+    var.org_prefix == "" ? {} : { org = var.org_prefix },
+  )
+
   # APIs the provisioning automation needs inside its own project.
   # admin.googleapis.com     -> Admin SDK Directory API (users, groups, members)
   # cloudidentity            -> Cloud Identity Groups API (optional alternative for group membership)
@@ -21,21 +32,30 @@ locals {
 # --------------------------------------------------------------------------
 
 resource "random_id" "project_suffix" {
+  count       = local.use_random_suffix ? 1 : 0
   byte_length = 2
 }
 
 resource "google_project" "identity" {
   name            = var.project_name
-  project_id      = "${var.project_id_prefix}-${random_id.project_suffix.hex}"
+  project_id      = local.project_id
   folder_id       = local.folder_id
   billing_account = var.billing_account_id
-  labels          = var.labels
+  labels          = local.project_labels
+
+  lifecycle {
+    precondition {
+      condition     = can(regex("^[a-z][a-z0-9-]{4,28}[a-z0-9]$", local.project_id))
+      error_message = "Project ID \"${local.project_id}\" is invalid: it must be 6-30 characters, start with a letter, and not end with a hyphen."
+    }
+  }
 
   # Don't create the legacy "default" network; this project has no workloads.
   auto_create_network = false
 
   # Guard against an accidental `terraform destroy` of an identity-critical project.
-  deletion_policy = "PREVENT"
+  # Terraform-only setting: switching it is an in-place state update, never a recreate.
+  deletion_policy = var.project_deletion_policy
 }
 
 resource "google_project_service" "services" {
