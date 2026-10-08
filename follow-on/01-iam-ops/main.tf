@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 # Change History
 # 2026-10-07 Steve Hager - v1.0 Initial version
-# 2026-10-07 Steve Hager - v1.1 resource "time_sleep" "sa_propagation" to prevent propagation delays from aborting a run. 
+# 2026-10-07 Steve Hager - v1.1 Added resource "time_sleep" "sa_propagation" to prevent propagation delays from aborting a run. 
 
 locals {
   folder_id = trimprefix(var.common_folder_id, "folders/")
@@ -104,6 +104,16 @@ resource "google_project_iam_member" "provisioner_service_usage" {
 }
 
 # --------------------------------------------------------------------------
+# A new SA takes a minute or so to become visible to Workspace;
+# assigning admin roles immediately fails with an invalid-assignee error.
+# --------------------------------------------------------------------------
+resource "time_sleep" "sa_propagation" {
+  count           = var.assign_workspace_roles ? 1 : 0
+  depends_on      = [google_service_account.provisioner]
+  create_duration = "120s"
+}
+
+# --------------------------------------------------------------------------
 # Workspace admin roles for the SA
 # --------------------------------------------------------------------------
 # Workspace lets you assign admin roles directly to a service account,
@@ -124,14 +134,4 @@ resource "googleworkspace_role_assignment" "provisioner" {
   scope_type  = "CUSTOMER"
 
   depends_on = [time_sleep.sa_propagation]
-}
-
-# --------------------------------------------------------------------------
-# A new SA takes a minute or so to become visible to Workspace;
-# assigning admin roles immediately fails with an invalid-assignee error.
-# --------------------------------------------------------------------------
-resource "time_sleep" "sa_propagation" {
-  count           = var.assign_workspace_roles ? 1 : 0
-  depends_on      = [google_service_account.provisioner]
-  create_duration = "90s"
 }
