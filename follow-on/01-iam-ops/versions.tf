@@ -1,6 +1,7 @@
 # ---------------------------------------------------------------------------
 # Change History
 # 2026-10-07 Steve Hager - v1.0 Initial version
+# 2026-10-07 Steve Hager - v1.1 added time to required_providers.
 
 terraform {
   required_version = ">= 1.6"
@@ -17,6 +18,10 @@ terraform {
     random = {
       source  = "hashicorp/random"
       version = "~> 3.6"
+    }
+    time = { 
+      source = "hashicorp/time"
+      version = "~> 0.12" 
     }
   }
 

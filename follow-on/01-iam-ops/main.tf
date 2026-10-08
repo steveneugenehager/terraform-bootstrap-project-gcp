@@ -3,6 +3,7 @@
 # ---------------------------------------------------------------------------
 # Change History
 # 2026-10-07 Steve Hager - v1.0 Initial version
+# 2026-10-07 Steve Hager - v1.1 resource "time_sleep" "sa_propagation" to prevent propagation delays from aborting a run. 
 
 locals {
   folder_id = trimprefix(var.common_folder_id, "folders/")
@@ -121,4 +122,16 @@ resource "googleworkspace_role_assignment" "provisioner" {
   role_id     = each.value.id
   assigned_to = google_service_account.provisioner.unique_id
   scope_type  = "CUSTOMER"
+
+  depends_on = [time_sleep.sa_propagation]
+}
+
+# --------------------------------------------------------------------------
+# A new SA takes a minute or so to become visible to Workspace;
+# assigning admin roles immediately fails with an invalid-assignee error.
+# --------------------------------------------------------------------------
+resource "time_sleep" "sa_propagation" {
+  count           = var.assign_workspace_roles ? 1 : 0
+  depends_on      = [google_service_account.provisioner]
+  create_duration = "90s"
 }
