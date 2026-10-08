@@ -1,3 +1,7 @@
+# ---------------------------------------------------------------------------
+# Change History
+# 2026-10-07 Steve Hager - v1.0 Initial version
+
 variable "org_domain" {
   description = "Primary Workspace / Cloud Identity domain."
   type        = string

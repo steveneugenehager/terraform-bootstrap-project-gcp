@@ -1,3 +1,7 @@
+# ---------------------------------------------------------------------------
+# Change History
+# 2026-10-07 Steve Hager - v1.0 Initial version
+
 terraform {
   required_version = ">= 1.6"
 

@@ -48,7 +48,7 @@ These steps can't be done by Terraform and must exist first.
    - Project Creator
    - Billing Account User (or Billing Account Administrator) on the billing account
 4. **Tools** on the machine running Terraform:
-   - Terraform 1.5 or later (`terraform version`)
+   - Terraform 1.6 or later (`terraform version`)
    - Google Cloud CLI (`gcloud version`)
 
 Establish your GCP authentication using the "Org Owner" "Super Admin" account via: 

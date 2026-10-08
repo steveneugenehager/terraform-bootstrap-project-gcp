@@ -1,8 +1,10 @@
 # Change History
 # 2026-10-07 Steve Hager - v1.1 Added terraform.required_providers.time
 # 2026-10-07 Steve Hager - v1.2 After initial local state run, updating backend block.
+# 2026-10-07 Steve Hager - v1.3 Aligned required_version with follow-on configs.
+
 terraform {
-  required_version = ">= 1.5"
+  required_version = ">= 1.6"
 
   required_providers {
     google = {

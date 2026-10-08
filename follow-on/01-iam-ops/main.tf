@@ -1,3 +1,9 @@
+# ---------------------------------------------------------------------------
+# Create a project and SA to be used for automated user creation. 
+# ---------------------------------------------------------------------------
+# Change History
+# 2026-10-07 Steve Hager - v1.0 Initial version
+
 locals {
   folder_id = trimprefix(var.common_folder_id, "folders/")
 

@@ -1,3 +1,7 @@
+# ---------------------------------------------------------------------------
+# Change History
+# 2026-10-07 Steve Hager - v1.0 Initial version
+
 output "project_id" {
   description = "ID of the identity automation project."
   value       = google_project.identity.project_id
