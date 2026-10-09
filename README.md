@@ -2,7 +2,12 @@
 
 Creates the foundation every other Terraform configuration in this organization
 depends on: a **seed project**, a **versioned GCS bucket for Terraform state**, and
-a **Terraform service account** that later configurations impersonate.
+two **service accounts** that later configurations impersonate:
+
+- `terraform`: the general automation identity used by most configurations.
+- `tf-org-policy-admin`: used only by `terraform-org-level-policy-gcp` to manage
+  organization policies. It is kept separate so that org-wide policy rights aren't
+  held by the identity every other configuration runs as.
 
 This is the only configuration that starts with local state. After its first
 apply, it migrates its own state into the bucket it created, so nothing important
@@ -12,11 +17,12 @@ ever lives on a single machine.
 
 | Resource | Purpose |
 |---|---|
-| Seed project (`<prefix>-seed-<random>`) | Holds state and the automation identity. Protected with `deletion_policy = "PREVENT"`. |
-| Project APIs | Resource Manager, Cloud Billing, IAM, IAM Credentials, Service Usage, Cloud Storage. |
+| Seed project (`<prefix>-seed-<random>`) | Holds state and the automation identities. Protected with `deletion_policy = "PREVENT"`. Terraform ignores its `org_id`/`folder_id` after creation (see [Seed project placement](#seed-project-placement)). |
+| Project APIs | Resource Manager, Cloud Billing, IAM, IAM Credentials, Service Usage, Cloud Storage, Cloud Identity, Org Policy. Org Policy is enabled because the org-policy configuration uses the seed project as its quota project. |
 | State bucket (`<seed-project-id>-tfstate`) | Shared by all configurations, each under its own prefix. Versioned, public access blocked, uniform bucket-level access, old versions trimmed by a lifecycle rule. |
-| `terraform` service account | The identity later configurations run as. No key files; access is by impersonation. |
-| IAM bindings | Service account access to the state bucket; impersonation rights for listed admins; optional Billing Account User; Project Creator and Folder Admin at the organization when `org_id` is set. |
+| `terraform` service account | The identity most later configurations run as. No key files; access is by impersonation. |
+| `terraform` IAM bindings | Access to the state bucket; impersonation rights for listed admins; optional Billing Account User; Project Creator and Folder Admin at the organization when `org_id` is set. |
+| `tf-org-policy-admin` service account | Used only by `terraform-org-level-policy-gcp`. Created only when `org_id` is set. Holds `roles/orgpolicy.policyAdmin` at the organization, `roles/serviceusage.serviceUsageConsumer` on the seed project, and `roles/storage.objectAdmin` on the state bucket. Only `terraform_admins` can impersonate it; the `terraform` SA cannot. |
 | Org-level admin groups | Such are few, small and tightly held.|
 
 ## Repository layout
@@ -25,13 +31,16 @@ ever lives on a single machine.
 .
 ├── versions.tf                 # Terraform and provider versions, backend block
 ├── variables.tf                # Inputs, with validation
-├── main.tf                     # Seed project, APIs, state bucket, service account, IAM
-├── outputs.tf                  # Project ID, bucket, service account, example backend block
+├── main.tf                     # Seed project, APIs, state bucket, terraform SA, IAM
+├── groups.tf                   # Org-level admin groups (Cloud Identity) and their bindings
+├── org_policy_sa.tf            # tf-org-policy-admin SA for terraform-org-level-policy-gcp
+├── outputs.tf                  # Project ID, bucket, both service accounts, example backend block
 ├── terraform.tfvars.example    # Copy to terraform.tfvars and fill in
 ├── .terraform.lock.hcl         # Pinned provider versions (committed)
-├──.gitignore                   # Excludes state, tfvars, and .terraform/
+├── .gitignore                  # Excludes state, tfvars, and .terraform/
 └── follow-on                   # Follow On Activities belonging in "Bootstrap" stage.
-   └── create_secondary_org_admin.sh  # Creates secondary Super Admin for the GCP organization.
+    ├── 01-iam-ops/             # Common identity project and user-provisioning SA (see its README)
+    └── create_secondary_org_admin.sh  # Creates secondary Super Admin for the GCP organization.
 ```
 
 ## Prerequisites
@@ -165,9 +174,48 @@ provider "google" {
 The backend and the provider authenticate separately, so both need the
 impersonation setting.
 
-The service account starts with access only to the state bucket and, with an
-organization, project and folder creation. Grant it further roles on the
+The `terraform` service account starts with access only to the state bucket and,
+with an organization, project and folder creation. Grant it further roles on the
 folders or projects each configuration manages.
+
+### Org-policy configuration
+
+`terraform-org-level-policy-gcp` uses the `tf-org-policy-admin` service account
+instead of `terraform`. Get its address with:
+
+```bash
+terraform output org_policy_service_account
+```
+
+Org Policy API calls need a quota project, so its provider bills them to the seed
+project. The Service Usage Consumer grant on the seed project covers this.
+
+```hcl
+terraform {
+  backend "gcs" {
+    bucket                      = "SEED_PROJECT_ID-tfstate"
+    prefix                      = "org/policy"
+    impersonate_service_account = "tf-org-policy-admin@SEED_PROJECT_ID.iam.gserviceaccount.com"
+  }
+}
+
+provider "google" {
+  impersonate_service_account = "tf-org-policy-admin@SEED_PROJECT_ID.iam.gserviceaccount.com"
+  billing_project             = "SEED_PROJECT_ID"
+  user_project_override       = true
+}
+```
+
+The output is `null` when `org_id` is not set, because the account is not created.
+
+## Seed project placement
+
+This configuration runs first, before any folders exist, so the seed project is
+created directly under the organization. Once the folder structure exists, you can
+move the project into a folder (for example, `common`) using the console. The
+`lifecycle { ignore_changes = [org_id, folder_id] }` block on `google_project.seed`
+stops Terraform from moving it back, so the bootstrap stays repeatable as the first
+step and later plans don't show drift for the new placement.
 
 ## Recovering state
 
@@ -236,8 +284,11 @@ Set an ADC quota project to any existing project the admin account can access:
 ## Security notes
 
 - No service account keys are created or downloaded; all automation uses impersonation.
+- Org-policy rights (`roles/orgpolicy.policyAdmin`) are held only by the dedicated
+  `tf-org-policy-admin` account, not by the general `terraform` account. Only the
+  named `terraform_admins` can impersonate it.
 - State files can contain sensitive values in plain text. Access to the bucket is
-  limited to the Terraform service account and organization administrators.
+  limited to the bootstrap service accounts and organization administrators.
 - `billing_account` is marked `sensitive`, which hides it in plan output but does
   not encrypt it in state.
 - `.terraform.lock.hcl` is committed so every machine uses the same provider versions.
