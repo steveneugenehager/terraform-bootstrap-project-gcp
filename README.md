@@ -22,7 +22,7 @@ ever lives on a single machine.
 | State bucket (`<seed-project-id>-tfstate`) | Shared by all configurations, each under its own prefix. Versioned, public access blocked, uniform bucket-level access, old versions trimmed by a lifecycle rule. |
 | `terraform` service account | The identity most later configurations run as. No key files; access is by impersonation. |
 | `terraform` IAM bindings | Access to the state bucket; impersonation rights for listed admins; optional Billing Account User; Project Creator and Folder Admin at the organization when `org_id` is set. |
-| `tf-org-policy-admin` service account | Used only by `terraform-org-level-policy-gcp`. Created only when `org_id` is set. Holds `roles/orgpolicy.policyAdmin` at the organization, `roles/serviceusage.serviceUsageConsumer` on the seed project, and `roles/storage.objectAdmin` on the state bucket. Only `terraform_admins` can impersonate it; the `terraform` SA cannot. |
+| `tf-org-policy-admin` service account | Used only by `terraform-org-level-policy-gcp`. Created only when `org_id` is set. Holds `roles/orgpolicy.policyAdmin` and `roles/resourcemanager.tagAdmin` at the organization, `roles/serviceusage.serviceUsageConsumer` on the seed project, and `roles/storage.objectAdmin` on the state bucket. Only `terraform_admins` can impersonate it; the `terraform` SA cannot. |
 | Org-level admin groups | Such are few, small and tightly held.|
 
 ## Repository layout
