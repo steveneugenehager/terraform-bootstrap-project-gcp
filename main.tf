@@ -5,6 +5,13 @@
 # 2026-10-06 Steve Hager - v1.1 Added "cloudidentity.googleapis.com" to seed_apis list.
 # 2026-10-07 Steve Hager - v1.2 Added "time_sleep" "seed_apis_propagation" to prevent race condition 
 #                                 involving an API enablement and group creation. 
+# 2026-10-08 Steve Hager - v1.3 Added "orgpolicy.googleapis.com" to seed_apis list.
+#                               Added google_project.seed.lifecycle to account for the fact
+#                                 this "seed" project was created first, before folders.
+#                                 I want this procedure to be the first step and repeatable.
+#                                 Setting lifecycle ignore_changes = [org_id, folder_id]
+#                                 allows me to move the project to a folder created later via the console
+#                                 but let Terraform ignore that new placement.
 
 resource "random_id" "suffix" {
   byte_length = 2
@@ -27,6 +34,10 @@ resource "google_project" "seed" {
     purpose    = "terraform-bootstrap"
     managed_by = "terraform"
   }
+
+  lifecycle {
+    ignore_changes = [org_id, folder_id]
+  }
 }
 
 locals {
@@ -38,6 +49,7 @@ locals {
     "serviceusage.googleapis.com",         # enable APIs in other projects
     "storage.googleapis.com",              # the state bucket
     "cloudidentity.googleapis.com",
+    "orgpolicy.googleapis.com", # org policy repo uses seed as quota project
   ]
 }
 
